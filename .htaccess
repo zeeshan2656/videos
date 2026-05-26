@@ -1,0 +1,45 @@
+Options -Indexes
+
+# ── Security headers ──────────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ── Block uploads/includes direct access ──────────────────────
+<FilesMatch "\.(php)$">
+    <If "%{REQUEST_URI} =~ m#(^/FreeHub\.Live)?/(cache|uploads)/.*#">
+        Order Deny,Allow
+        Deny from all
+    </If>
+</FilesMatch>
+
+# ── Gzip compression ──────────────────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json text/plain
+</IfModule>
+
+# ── Browser caching ───────────────────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png  "access plus 30 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType text/css   "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType video/mp4  "access plus 1 day"
+</IfModule>
+
+# ── Block sensitive files ─────────────────────────────────────
+<FilesMatch "(\.env|\.git|composer\.json|package\.json)">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# ── Protect cache directory ───────────────────────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^cache/ - [F,L]
+</IfModule>
